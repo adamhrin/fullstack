@@ -1,0 +1,9 @@
+note over browser:
+user writes a note and hits the Save btn
+js-code adds the note to a notes array on form submit event
+and rerenders the html element holding the notes
+now with the new note in it
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa (Request payload: {content, date})
+server-->browser: HTTP status code 201 {"message":"note created"}
