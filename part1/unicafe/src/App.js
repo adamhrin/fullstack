@@ -14,12 +14,12 @@ const Statistic = ({ text, value }) => (
 )
 
 const Statistics = ({ good, neutral, bad }) => {
-  let all = good + neutral + bad
+  const all = good + neutral + bad
   if (all === 0) {
     return <p>No feedback given</p>
   }
-  let average = (good - bad) / all
-  let positive = (good / all) * 100
+  const average = (good - bad) / all
+  const positive = (good / all) * 100
   return (
     <table>
       <tbody>
