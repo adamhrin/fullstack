@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const Filter = (props) => (
   <div>
@@ -32,12 +33,7 @@ const Persons = ({ filteredPersons }) => {
 }
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
 
@@ -45,12 +41,22 @@ const App = () => {
   const [ filteredPersons, setFilteredPersons ] = useState(persons)
   const [ filter, setFilter ] = useState('')
 
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        const personsData = response.data
+        setPersons(personsData)
+        // filter response.data and update filteredPersons state with the result
+        setFilteredPersons(filterPersons(filter, personsData))
+      })
+  }, [])
+
   // this function filters persons according to the current filter value
   const filterPersons = (filter, personsToFilter = persons) => {
     const filteredPersons = personsToFilter.filter(
       person => {
         const re = new RegExp(filter, 'i')
-        console.log(re);
         return person.name.match(re)
       }
     )
