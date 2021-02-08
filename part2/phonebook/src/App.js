@@ -1,44 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-
-const Filter = (props) => (
-  <div>
-    filter shown with
-    <input value={props.filter} onChange={props.filterChangeHandler}/>
-  </div>
-)
-
-const PersonForm = (props) => (
-  <form onSubmit={props.submitHandler}>
-    <div>
-      name: 
-      <input value={props.newName} onChange={props.nameChangeHandler}/>
-    </div>
-    <div>
-      number:
-      <input value={props.newNumber} onChange={props.numberChangeHandler}/>
-    </div>
-    <div>
-      <button type="submit">add</button>
-    </div>
-  </form>
-)
-
-const Person = (props) => <p>{props.name} {props.number}</p>
-
-const Persons = ({ filteredPersons }) => {
-  return filteredPersons.map(person => 
-    <Person key={person.name} name={person.name} number={person.number}/>
-  )
-}
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
-
-  // using additional array filteredPersons that will be rendered in the Persons list
-  const [ filteredPersons, setFilteredPersons ] = useState(persons)
   const [ filter, setFilter ] = useState('')
 
   useEffect(() => {
@@ -47,14 +16,12 @@ const App = () => {
       .then(response => {
         const personsData = response.data
         setPersons(personsData)
-        // filter response.data and update filteredPersons state with the result
-        setFilteredPersons(filterPersons(filter, personsData))
       })
   }, [])
 
   // this function filters persons according to the current filter value
-  const filterPersons = (filter, personsToFilter = persons) => {
-    const filteredPersons = personsToFilter.filter(
+  const getFilteredPersons = (filter) => {
+    const filteredPersons = persons.filter(
       person => {
         const re = new RegExp(filter, 'i')
         return person.name.match(re)
@@ -62,6 +29,7 @@ const App = () => {
     )
     return filteredPersons
   }
+  
   const handleSubmit = (event) => {
     event.preventDefault()
     const newPerson = {
@@ -80,8 +48,6 @@ const App = () => {
       alert(`${newName} is already in the phonebook`)
     } else {
       setPersons(newPersons)
-      // filter newPersons and update filteredPersons state with the result
-      setFilteredPersons(filterPersons(filter, newPersons))
     }
     setNewName('')
     setNewNumber('')
@@ -96,10 +62,10 @@ const App = () => {
   }
 
   const handleFilterChange = (event) => {
-    const filter = event.target.value
-    setFilter(filter)
-    setFilteredPersons(filterPersons(filter))
+    setFilter(event.target.value)
   }
+
+  const personsToShow = getFilteredPersons(filter)
 
   return (
     <div>
@@ -119,7 +85,7 @@ const App = () => {
       
       <h3>Numbers</h3>
 
-      <Persons filteredPersons={filteredPersons} />
+      <Persons filteredPersons={personsToShow} />
       
     </div>
   )
