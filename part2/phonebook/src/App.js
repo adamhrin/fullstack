@@ -3,13 +3,17 @@ import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 import personsService from './services/persons'
+import './index.css'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ filter, setFilter ] = useState('')
+  const [ message, setMessage ] = useState(null)
+  const [ notifClassName, setNotifClassName] = useState('')
 
   useEffect(() => {
     personsService
@@ -54,6 +58,21 @@ const App = () => {
             setPersons(persons.map(person => person.id !== id ? person : updatedPerson))
             setNewName('')
             setNewNumber('')
+            setNotifClassName('success')
+            setMessage(
+              `Updated number of ${updatedPerson.name} to ${updatedPerson.number}`
+            )
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+          })
+          .catch(error => {
+            console.log(error);
+            setNotifClassName('error')
+            setMessage(`Information of ${personToUpdate.name} has already been removed from server`)
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
           })
       }
     } else {
@@ -63,6 +82,11 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setNotifClassName('success')
+          setMessage(`Added ${returnedPerson.name}`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         })
     }
   }
@@ -81,12 +105,18 @@ const App = () => {
 
   const handleDelete = id => {
     const personToDelete = persons.find(p => p.id === id)
-    if (window.confirm(`Delete ${personToDelete.name}?`)) {
+    const name = personToDelete.name
+    if (window.confirm(`Delete ${name}?`)) {
       personsService
-      .deletePerson(id)
-      .then(response => {
-        setPersons(persons.filter(p => p.id !== id))
-      })
+        .deletePerson(id)
+        .then(response => {
+          setPersons(persons.filter(p => p.id !== id))
+          setNotifClassName('success')
+          setMessage(`Deleted ${name}`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
     }
   }
 
@@ -95,6 +125,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={message} className={notifClassName} />
 
       <Filter filter={filter} filterChangeHandler={handleFilterChange} />
 
