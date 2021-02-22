@@ -40,10 +40,13 @@ describe('post', () => {
       url: 'https://someurl.com',
       likes: 12
     }
+
+    
   
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set( 'Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYwMzNmMGFjN2RjZTZkMjEyODczZTAyYSIsImlhdCI6MTYxNDAyMTY4MCwiZXhwIjoxNjE0MDI1MjgwfQ.L-Q8_vs3QjbYm_U3uE7rr8sZysbxTo5GVy4dx7gtDqo')
       .expect(201)
       .expect('Content-Type', /application\/json/)
   
@@ -64,6 +67,7 @@ describe('delete', () => {
   
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+
       .expect(204)
   
     const blogsAtEnd = await helper.blogsInDb()
