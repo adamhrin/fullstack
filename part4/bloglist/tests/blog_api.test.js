@@ -5,8 +5,6 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
-const { expect } = require('@jest/globals')
-const { toBindingIdentifierName } = require('@babel/types')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -30,6 +28,12 @@ describe('get', () => {
   
     expect(response.body).toHaveLength(helper.initialBlogs.length)
   })
+
+  test('unique identifier of blog is named id', async () => {
+    const response = await api.get('/api/blogs')
+
+    expect(response.body[0].id).toBeDefined()
+  })
 })
 
 describe('post', () => {
@@ -41,12 +45,10 @@ describe('post', () => {
       likes: 12
     }
 
-    
-  
     await api
       .post('/api/blogs')
       .send(newBlog)
-      .set( 'Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYwMzNmMGFjN2RjZTZkMjEyODczZTAyYSIsImlhdCI6MTYxNDAyMTY4MCwiZXhwIjoxNjE0MDI1MjgwfQ.L-Q8_vs3QjbYm_U3uE7rr8sZysbxTo5GVy4dx7gtDqo')
+      //.set( 'Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYwMzNmMGFjN2RjZTZkMjEyODczZTAyYSIsImlhdCI6MTYxNDAyMTY4MCwiZXhwIjoxNjE0MDI1MjgwfQ.L-Q8_vs3QjbYm_U3uE7rr8sZysbxTo5GVy4dx7gtDqo')
       .expect(201)
       .expect('Content-Type', /application\/json/)
   
@@ -57,6 +59,45 @@ describe('post', () => {
     expect(titles).toContain(
       'New blog about async/await'
     )
+  })
+
+  test('likes property if undefined defaults to 0', async () => {
+    const newBlog = {
+      title: 'Likes default to 0',
+      author: 'Adam',
+      url: 'https://someurl.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    
+    const addedBlog = blogsAtEnd.find(blog => blog.title === 'Likes default to 0')
+    expect(addedBlog.likes).toBe(0)
+  })
+
+  test('failed with correct code if title or url are missing', async () => {
+    const newBlog = {
+      url: 'https://someurl.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+
+    newBlog = {
+      title: 'some title'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
   })
 })
 
