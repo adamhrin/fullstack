@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './index.css'
@@ -9,18 +11,17 @@ const App = () => {
   const [blogs, setBlogs] = useState([])
   const [notif, setNotif] = useState(null)
   const [notifClassName, setNotifClassName] = useState('')
-  const [username, setUsername] = useState('') 
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
+  const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
+    blogService.getAll().then(blogs => {
+      const sortedBlogs = blogs.sort((a,b) => (a.likes > b.likes) ? -1 : 1)
+      setBlogs( sortedBlogs )
+    })
   }, [])
 
   useEffect(() => {
@@ -61,7 +62,7 @@ const App = () => {
       <Notification notif={notif} className={notifClassName} />
       <div>
         username
-          <input
+        <input
           type="text"
           value={username}
           name="Username"
@@ -70,7 +71,7 @@ const App = () => {
       </div>
       <div>
         password
-          <input
+        <input
           type="password"
           value={password}
           name="Password"
@@ -78,78 +79,66 @@ const App = () => {
         />
       </div>
       <button type="submit">login</button>
-    </form>      
+    </form>
   )
 
-  const handleLogout = (event) => {
+  const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
   }
 
-  const addBlog = (event) => {
-    event.preventDefault()
-    const blogObject = {
-      title: newTitle,
-      author: newAuthor,
-      url: newUrl
-    }
-
+  const addBlog = (blogObject) => {
+    blogFormRef.current.toggleVisibility()
     blogService
       .create(blogObject)
       .then(returnedBlog => {
         // NEVER MUTATE STATE DIRECTLY in React
         // therefore using concat which creates a new copy with added note object
+        returnedBlog.user = user
         setBlogs(blogs.concat(returnedBlog))
-        setNotifClassName('success')
-        setNotif(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
-        setNewTitle('')
-        setNewAuthor('')
-        setNewUrl('')
-        setTimeout(() => {
-          setNotif(null)
-        }, 5000)
       })
   }
 
-  const blogForm = () => ( 
-    <form onSubmit={addBlog}>
-      <h2>create new</h2>
-      <div>
-        title:
-          <input
-          type="text"
-          value={newTitle}
-          name="newTitle"
-          onChange={({ target }) => setNewTitle(target.value)}
-        />
-      </div>
-      <div>
-        author:
-          <input
-          type="text"
-          value={newAuthor}
-          name="newAuthor"
-          onChange={({ target }) => setNewAuthor(target.value)}
-        />
-      </div>
-      <div>
-        url:
-          <input
-          type="text"
-          value={newUrl}
-          name="newUrl"
-          onChange={({ target }) => setNewUrl(target.value)}
-        />
-      </div>
-      <button type="submit">create</button>
-    </form>
+  const updateBlog = (blogId, blogObject) => {
+    blogService
+      .update(blogId, blogObject)
+      .then(returnedBlog => {
+        const updatedBlog = blogs.find(b => b.id === returnedBlog.id)
+        updatedBlog.likes += 1
+
+        setBlogs(
+          blogs.map(
+            blog => blog.id !== blogId ?
+              blog :
+              updatedBlog
+          )
+        )
+      })
+  }
+
+  const deleteBlog = (blogId) => {
+    blogService
+      .deleteBlog(blogId)
+      .then(() => {
+        setBlogs(blogs.filter(b => b.id !== blogId))
+      })
+  }
+
+  const blogForm = () => (
+    <Togglable buttonLabel='create new blog' ref={blogFormRef}>
+      <BlogForm createBlog={addBlog} />
+    </Togglable>
   )
 
   const blogList = () => (
     <div>
-      
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateBlog={updateBlog}
+          deleteBlog={deleteBlog}
+          username={user.username}/>
       )}
     </div>
   )
@@ -168,7 +157,7 @@ const App = () => {
         </div>
       }
 
-      
+
     </div>
   )
 }

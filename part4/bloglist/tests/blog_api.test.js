@@ -5,13 +5,21 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
 
   for (let blog of helper.initialBlogs) {
     let blogObject = new Blog(blog)
+    console.log(blogObject)
     await blogObject.save()
+  }
+
+  for (let user of helper.initialUsers) {
+    let userObject = new User(user)
+    console.log(userObject)
+    await userObject.save()
   }
 })
 
