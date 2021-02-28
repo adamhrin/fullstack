@@ -38,11 +38,11 @@ const Blog = ({ blog, updateBlog, deleteBlog, username }) => {
 
   return (
     <div style={blogStyle}>
-      <div style={hideWhenVerbose}>
+      <div style={hideWhenVerbose} className='non-verbose'>
         {blog.title} {blog.author}
         <button onClick={toggleVerbose}>view</button>
       </div>
-      <div style={viewWhenVerbose}>
+      <div style={viewWhenVerbose} className='verbose'>
         {blog.title} {blog.author}
         <button onClick={toggleVerbose}>hide</button>
         <div>{blog.url}</div>
