@@ -37,10 +37,10 @@ const Blog = ({ blog, updateBlog, deleteBlog, username }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog' style={blogStyle}>
       <div style={hideWhenVerbose} className='non-verbose'>
         {blog.title} {blog.author}
-        <button onClick={toggleVerbose}>view</button>
+        <button className='viewBtn' onClick={toggleVerbose}>view</button>
       </div>
       <div style={viewWhenVerbose} className='verbose'>
         {blog.title} {blog.author}
@@ -48,10 +48,10 @@ const Blog = ({ blog, updateBlog, deleteBlog, username }) => {
         <div>{blog.url}</div>
         <div>
           likes {blog.likes}
-          <button onClick={addLike}>like</button>
+          <button id='likeBtn' className='likeBtn' onClick={addLike}>like</button>
         </div>
         <div>{blog.user.name}</div>
-        <button style={showWhenUser} onClick={removeBlog}>remove</button>
+        <button id='removeBtn' style={showWhenUser} onClick={removeBlog}>remove</button>
       </div>
     </div>
   )
