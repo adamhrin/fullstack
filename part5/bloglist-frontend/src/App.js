@@ -33,6 +33,14 @@ const App = () => {
     }
   }, [])
 
+  const showNotif = (kind, message) => {
+    setNotifClassName(kind)
+    setNotif(message)
+    setTimeout(() => {
+      setNotif(null)
+    }, 5000)
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -48,11 +56,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setNotifClassName('error')
-      setNotif('Wrong credentials')
-      setTimeout(() => {
-        setNotif(null)
-      }, 5000)
+      showNotif('error', 'Wrong credentials')
     }
   }
 
@@ -96,6 +100,7 @@ const App = () => {
         // therefore using concat which creates a new copy with added note object
         returnedBlog.user = user
         setBlogs(blogs.concat(returnedBlog))
+        showNotif('success', `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
       })
   }
 
