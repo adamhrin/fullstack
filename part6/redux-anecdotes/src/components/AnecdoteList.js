@@ -1,8 +1,7 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { vote } from '../reducers/anecdoteReducer'
-import { hideMessage, setMessage } from '../reducers/notificationReducer'
-import anecdoteService from '../services/anecdotes'
+import { setMessage } from '../reducers/notificationReducer'
 
 const Anecdote = ({ anecdote, handleClick }) => {
   return(
@@ -26,7 +25,6 @@ const Anecdotes = () => {
       return a.content.match(re)
     })
   })
-
   const addVote = async (anecdote) => {
     dispatch(vote(anecdote))
     dispatch(setMessage(`you voted for '${anecdote.content}'`, 5))

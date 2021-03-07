@@ -8,6 +8,8 @@ const initialState = {
   }
 }
 
+var timeoutID
+
 const notificationReducer = (state = initialState, action) => {
   switch(action.type) {
     case 'SET_MESSAGE':
@@ -34,11 +36,12 @@ const notificationReducer = (state = initialState, action) => {
 
 export const setMessage = (message, duration) => {
   return async dispatch => {
+    clearTimeout(timeoutID)
     dispatch({
       type: 'SET_MESSAGE',
       message: message
     })
-    setTimeout(() => {
+    timeoutID = setTimeout(() => {
       dispatch({
         type: 'HIDE'
       })
