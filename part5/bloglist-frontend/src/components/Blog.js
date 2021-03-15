@@ -1,30 +1,39 @@
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { vote, deleteBlog } from '../reducers/blogReducer'
+import { setMessage } from '../reducers/notificationReducer'
 
-const Blog = ({ blog, updateBlog, deleteBlog, username }) => {
+const Blog = ({ blog }) => {
+  const dispatch = useDispatch()
+  const user = useSelector(state => state.user)
+
   const [verbose, setVerbose] = useState(false)
 
   const hideWhenVerbose = { display: verbose ? 'none' : '' }
   const viewWhenVerbose = { display: verbose ? '' : 'none' }
-  const showWhenUser = { display: username === blog.user.username ? '' : 'none' }
+  const showWhenUser = { display: user.username === blog.user.username ? '' : 'none' }
 
   const toggleVerbose = () => {
     setVerbose(!verbose)
   }
 
   const addLike = () => {
-    const blogObject = {
+    const updatedBlog = {
       user: blog.user.id,
       likes: blog.likes + 1,
       title: blog.title,
       author: blog.author,
-      url: blog.url
+      url: blog.url,
+      id: blog.id
     }
-    updateBlog(blog.id, blogObject)
+
+    dispatch(vote(updatedBlog))
+    dispatch(setMessage(`you voted for '${blog.title}'`, 5))
   }
 
   const removeBlog = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteBlog(blog.id)
+      dispatch(deleteBlog(blog.id))
     }
   }
 
